@@ -1,0 +1,7 @@
+torch
+numpy
+scikit-learn
+joblib
+psycopg2-binary
+google-cloud-storage
+python-dotenv
