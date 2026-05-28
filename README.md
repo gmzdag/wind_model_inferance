@@ -4,12 +4,12 @@ Bu servis, rüzgar türbini için geliştirilmiş LSTM Autoencoder anomali tespi
 
 ## Servisin Amacı
 1. TimescaleDB içindeki `feature_vectors` tablosundan son sequence (20 feature vector) okumak.
-2. Google Cloud Storage (GCS) üzerinden model eğitim artifact'lerini (model, scaler, metrics) indirmek (Model, threshold vs. GCS'ten alınır).
+2. Google Cloud Storage (GCS) üzerinden model eğitim artifact'lerini (model, scaler, threshold) indirmek (Model, threshold vs. GCS'ten alınır).
 3. Feature verisini normalize ederek model üzerinden geçirmek (reconstruction error hesaplamak).
-4. Hesaplanan hatayı metrics ile belirlenen threshold değeriyle kıyaslayıp anomali kararını vermek.
+4. Hesaplanan hatayı threshold ile belirlenen anomali eşik değeriyle kıyaslayıp anomali kararını vermek.
 5. Sonuçları `anomaly_results` tablosuna yazmak.
 
-> **Önemli Not:** Şu an projede sadece `lstm_autoencoder.py` dosyası bulunmaktadır. `best_model.pt`, `scaler.joblib`, `metrics.json` artifact'leri Google Cloud Bucket içinde bulunmalıdır. Bu veritabanı (TimescaleDB) ve inference servisi, Google Cloud VM içindeki Docker ortamında çalışacak şekilde yapılandırılmıştır.
+> **Önemli Not:** Şu an projede sadece `lstm_autoencoder.py` dosyası bulunmaktadır. `best_model.pt`, `scaler.joblib`, `threshold.json` artifact'leri Google Cloud Bucket içinde bulunmalıdır. Bu veritabanı (TimescaleDB) ve inference servisi, Google Cloud VM içindeki Docker ortamında çalışacak şekilde yapılandırılmıştır.
 
 ## Beklenen DB Tabloları
 
@@ -39,7 +39,7 @@ CREATE TABLE anomaly_results (
 gs://wind-turbine-pdm-models/lstm_autoencoder/v1/
 ├── best_model.pt
 ├── scaler.joblib
-└── metrics.json
+└── threshold.json
 ```
 **Eksik Artifact'ler:** Bu dosyalar GCS'e yüklendiğinde servis `/app/artifacts/` dizini içine indirecektir.
 

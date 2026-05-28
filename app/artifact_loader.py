@@ -7,14 +7,14 @@ from app.lstm_autoencoder import LSTMAutoencoder
 
 logger = logging.getLogger(__name__)
 
-def load_inference_artifacts(checkpoint_path, scaler_path, metrics_path, device):
-    # Model, scaler ve threshold değerini yükler. Threshold GCS'ten gelen metrics.json'dan okunur.
+def load_inference_artifacts(checkpoint_path, scaler_path, threshold_path, device):
+    # Model, scaler ve threshold değerini yükler. Threshold GCS'ten gelen threshold.json'dan okunur.
     if not os.path.exists(checkpoint_path):
         raise FileNotFoundError(f"Model checkpoint bulunamadı: {checkpoint_path}")
     if not os.path.exists(scaler_path):
         raise FileNotFoundError(f"Scaler bulunamadı: {scaler_path}")
-    if not os.path.exists(metrics_path):
-        raise FileNotFoundError(f"Metrics (Threshold) dosyası bulunamadı: {metrics_path}")
+    if not os.path.exists(threshold_path):
+        raise FileNotFoundError(f"Threshold dosyası bulunamadı: {threshold_path}")
 
     checkpoint = torch.load(
         checkpoint_path,
@@ -39,11 +39,11 @@ def load_inference_artifacts(checkpoint_path, scaler_path, metrics_path, device)
     logger.info("Scaler başarıyla yüklendi.")
 
     # GCS'ten gelen dinamik threshold değerini oku
-    with open(metrics_path, "r", encoding="utf-8") as f:
-        metrics = json.load(f)
+    with open(threshold_path, "r", encoding="utf-8") as f:
+        threshold_data = json.load(f)
 
-    threshold = float(metrics["threshold"]["value"])
-    threshold_method = metrics["threshold"].get("method", "bilinmiyor")
+    threshold = float(threshold_data["value"])
+    threshold_method = threshold_data.get("method", "bilinmiyor")
     logger.info(f"Threshold yüklendi: Değer={threshold}, Yöntem={threshold_method}")
 
     return model, scaler, threshold, threshold_method, model_config
