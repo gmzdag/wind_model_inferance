@@ -7,14 +7,14 @@ from app.lstm_autoencoder import LSTMAutoencoder
 
 logger = logging.getLogger(__name__)
 
-def load_inference_artifacts(checkpoint_path, scaler_path, threshold_path, device):
-    # Model, scaler ve threshold değerini yükler. Threshold GCS'ten gelen threshold.json'dan okunur.
+def load_inference_artifacts(checkpoint_path, scaler_path, metrics_path, device):
+    # Model, scaler ve threshold değerini yükler. Threshold GCS'ten gelen metrics.json'dan okunur.
     if not os.path.exists(checkpoint_path):
         raise FileNotFoundError(f"Model checkpoint bulunamadı: {checkpoint_path}")
     if not os.path.exists(scaler_path):
         raise FileNotFoundError(f"Scaler bulunamadı: {scaler_path}")
-    if not os.path.exists(threshold_path):
-        raise FileNotFoundError(f"Threshold dosyası bulunamadı: {threshold_path}")
+    if not os.path.exists(metrics_path):
+        raise FileNotFoundError(f"Metrics dosyası bulunamadı: {metrics_path}")
 
     checkpoint = torch.load(
         checkpoint_path,
@@ -27,7 +27,6 @@ def load_inference_artifacts(checkpoint_path, scaler_path, threshold_path, devic
     model_config.pop("name", None)
     model_config.pop("num_channels", None)
 
-
     model = LSTMAutoencoder(**model_config)
     model.load_state_dict(checkpoint["model_state_dict"])
     model.to(device)
@@ -38,12 +37,18 @@ def load_inference_artifacts(checkpoint_path, scaler_path, threshold_path, devic
     scaler = joblib.load(scaler_path)
     logger.info("Scaler başarıyla yüklendi.")
 
-    # GCS'ten gelen dinamik threshold değerini oku
-    with open(threshold_path, "r", encoding="utf-8") as f:
-        threshold_data = json.load(f)
+    # GCS'ten gelen dinamik threshold değerini oku (metrics.json)
+    with open(metrics_path, "r", encoding="utf-8") as f:
+        metrics_data = json.load(f)
 
-    threshold = float(threshold_data["value"])
-    threshold_method = threshold_data.get("method", "bilinmiyor")
+    val = metrics_data.get("threshold")
+    if isinstance(val, dict):
+        threshold = float(val.get("value", 2.55979299545288))
+        threshold_method = val.get("method", "bilinmiyor")
+    else:
+        threshold = float(val) if val is not None else 2.55979299545288
+        threshold_method = "direct_value"
+        
     logger.info(f"Threshold yüklendi: Değer={threshold}, Yöntem={threshold_method}")
 
     return model, scaler, threshold, threshold_method, model_config

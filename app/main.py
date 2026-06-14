@@ -171,10 +171,10 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
     checkpoint_path = os.path.join(LOCAL_ARTIFACT_DIR, "best_model.pt")
     scaler_path = os.path.join(LOCAL_ARTIFACT_DIR, "scaler.joblib")
-    threshold_path = os.path.join(LOCAL_ARTIFACT_DIR, "threshold.json")
+    metrics_path = os.path.join(LOCAL_ARTIFACT_DIR, "metrics.json")
     
     model, scaler, threshold, threshold_method, model_config = load_inference_artifacts(
-        checkpoint_path, scaler_path, threshold_path, device
+        checkpoint_path, scaler_path, metrics_path, device
     )
 
     # 3. Google Cloud'daki TimescaleDB'ye Bağlan

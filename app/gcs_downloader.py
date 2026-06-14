@@ -30,7 +30,7 @@ def download_artifacts(gcs_path: str, local_dir: str) -> None:
         logger.error(f"GCS istemcisi başlatılamadı. GOOGLE_APPLICATION_CREDENTIALS ayarlı mı? Hata: {e}")
         raise
 
-    required_files = ["best_model.pt", "scaler.joblib", "threshold.json"]
+    required_files = ["best_model.pt", "scaler.joblib", "metrics.json"]
 
     for file_name in required_files:
         blob_path = os.path.join(prefix, file_name).replace("\\", "/")
