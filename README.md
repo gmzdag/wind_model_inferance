@@ -55,19 +55,55 @@ gs://wind-turbine-pdm-models/lstm_autoencoder/v1/
 
 ## Çalıştırma Komutları
 
-### Docker Build
+### 1. Docker Build (VM üzerinde kodlar güncellendikten sonra)
 ```bash
 docker build -t wind-model-inference:latest .
 ```
 
-### Google Cloud VM Üzerinde Çalıştırma
-Google Cloud VM (Compute Engine) üzerinde çalıştırılırken genellikle "Service Account" otomatik olarak tanınır (GCS ve diğer Google servisleri için).
+### 2. Google Cloud VM Üzerinde Çalıştırma Seçenekleri
+
+#### A. Toplu İşleme (Batch Mode) - Sıfırdan Tüm Geçmiş Verileri İşleme
+Eğer veritabanındaki tüm geçmiş verileri sıfırdan anomali tespitinden geçirmek ve her adımın sonucunu terminalde canlı (`NORMAL` / `ANOMALİ`) olarak görmek istiyorsanız:
 ```bash
+docker run --rm \
+  --name wind-model-inference-batch \
+  --env-file .env \
+  --network host \
+  wind-model-inference:latest \
+  python app/main.py --mode batch --force-backfill
+```
+*(Bu komut çalışıp tüm verileri işledikten sonra otomatik olarak kapanır).*
+
+#### B. Canlı Akış (Stream Mode) - Arka Planda Sürekli Çalıştırma
+Veritabanına yeni veri geldikçe anomali tespitinin **canlı ve sürekli** olarak arka planda yapılması için:
+```bash
+# Eğer eski konteyner varsa durdurup silin:
+docker stop wind-model-inference || true
+docker rm wind-model-inference || true
+
+# Konteyneri arka planda (detached) başlatın:
 docker run -d \
   --name wind-model-inference \
   --env-file .env \
   --network host \
   wind-model-inference:latest
+```
+*Bu komut varsayılan olarak `--mode stream` ile çalışır ve her `POLL_INTERVAL_SECONDS` (varsayılan: 5 sn) sürede bir veritabanına yeni gelen verileri otomatik olarak işler.*
+
+### 3. Logları Canlı Takip Etme (Stream Modu İçin)
+Arka planda çalışan canlı akış servisinin loglarını terminalden anlık izlemek için:
+```bash
+docker logs -f wind-model-inference
+```
+
+### 4. Model Performansını Değerlendirme (F1, Precision, Recall vb.)
+Veritabanındaki anomali sonuçlarının başarısını ölçmek ve F1 skorunu tablo halinde görmek için:
+```bash
+docker run --rm \
+  --env-file .env \
+  --network host \
+  wind-model-inference:latest \
+  python app/evaluate.py
 ```
 
 ## Feature Order Uyarısı
