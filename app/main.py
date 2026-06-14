@@ -33,7 +33,7 @@ def verify_schema(conn):
                 reconstruction_error DOUBLE PRECISION NOT NULL CHECK (reconstruction_error >= 0),
                 threshold            DOUBLE PRECISION NOT NULL CHECK (threshold > 0),
                 is_anomaly           BOOLEAN          NOT NULL,
-                model_version        TEXT             DEFAULT 'v1'
+                model_version        TEXT             DEFAULT 'v2'
             );
         """)
         try:

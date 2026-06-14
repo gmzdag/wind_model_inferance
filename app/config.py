@@ -10,7 +10,7 @@ DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 MODEL_BUCKET_PATH = os.getenv("MODEL_BUCKET_PATH")
-MODEL_VERSION = os.getenv("MODEL_VERSION", "v1")
+MODEL_VERSION = os.getenv("MODEL_VERSION", "v2")
 
 LOCAL_ARTIFACT_DIR = os.getenv("LOCAL_ARTIFACT_DIR", "/app/artifacts")
 SEQUENCE_LENGTH = int(os.getenv("SEQUENCE_LENGTH", "20"))
