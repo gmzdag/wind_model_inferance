@@ -46,10 +46,10 @@ def result_exists(conn: connection, time, model_version: str) -> bool:
         )
         return cursor.fetchone()[0]
 
-def get_last_processed_time(conn: connection, model_version: str):
-    """anomaly_results tablosundaki belirli bir model sürümüne ait en son tahmin zaman damgasını döner."""
+def get_last_processed_time(conn: connection):
+    """anomaly_results tablosundaki en son tahmin edilen zaman damgasını döner."""
     with conn.cursor() as cursor:
-        cursor.execute("SELECT MAX(time) FROM anomaly_results WHERE model_version = %s;", (model_version,))
+        cursor.execute("SELECT MAX(time) FROM anomaly_results;")
         val = cursor.fetchone()[0]
         return val
 

@@ -51,8 +51,8 @@ def process_data(conn, model, threshold, device, args) -> str | None:
         logger.info("Force backfill aktif. Son tahmin zaman damgası yoksayılıyor, tüm veri sıfırdan işlenecek.")
         last_time = None
     else:
-        last_time = get_last_processed_time(conn, MODEL_VERSION)
-        logger.info(f"Son tahmin zaman damgası (last_time) [{MODEL_VERSION}]: {last_time}")
+        last_time = get_last_processed_time(conn)
+        logger.info(f"Son tahmin zaman damgası (last_time): {last_time}")
     
     # 2. Belirtilen zamandan sonrasını oku (çakışmayı koruyacak şekilde)
     rows = read_feature_vectors_since(conn, last_time, sequence_length=SEQUENCE_LENGTH)

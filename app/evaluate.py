@@ -66,12 +66,6 @@ def connect_db():
         sys.exit(1)
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(description="Model Performans Değerlendirme")
-    parser.add_argument("--version", type=str, default=os.getenv("MODEL_VERSION", "v2"),
-                        help="Değerlendirilecek model sürümü (örn: v1, v2)")
-    args = parser.parse_args()
-
     conn = connect_db()
     
     query = """
@@ -83,13 +77,12 @@ def main():
             ar.is_anomaly
         FROM anomaly_results ar
         JOIN feature_vectors fv ON ar.time = fv.time
-        WHERE ar.model_version = %s
         ORDER BY ar.time ASC
     """
     
     try:
         with conn.cursor() as cur:
-            cur.execute(query, (args.version,))
+            cur.execute(query)
             rows = cur.fetchall()
     except Exception as e:
         logger.error(f"Failed to execute evaluation query: {e}")
@@ -99,13 +92,13 @@ def main():
     conn.close()
     
     if not rows:
-        print(f"\n[!] Model sürümü '{args.version}' için eşleşen kayıt bulunamadı.")
-        print("Lütfen veritabanında bu sürümle yazılmış anomali tahmini bulunduğundan emin olun.")
+        print("\n[!] Eşleşen kayıt bulunamadı.")
+        print("Lütfen veritabanında en az bir anomali tahmini bulunduğundan emin olun.")
         return
 
     total = len(rows)
     print(f"\n==============================================================")
-    print(f"Model Performans Değerlendirme Raporu (Model Sürümü: {args.version})")
+    print(f"Model Performans Değerlendirme Raporu")
     print(f"Toplam Pencere Sayısı: {total}")
     print(f"==============================================================\n")
 
