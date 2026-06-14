@@ -123,7 +123,7 @@ def process_data(conn, model, threshold, device, args) -> str | None:
     # 6. Sonuçları topla ve DB'ye yaz
     results = []
     for t, err in zip(seq_times, errors_to_save):
-        is_anomaly = bool(err > threshold)
+        is_anomaly = bool(err >= threshold)
         results.append((t, err, threshold, is_anomaly, MODEL_VERSION))
 
     logger.info(f"Yazılacak anomali tahmini sayısı: {len(results)}")
