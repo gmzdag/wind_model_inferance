@@ -14,5 +14,6 @@ MODEL_VERSION = os.getenv("MODEL_VERSION", "v1")
 
 LOCAL_ARTIFACT_DIR = os.getenv("LOCAL_ARTIFACT_DIR", "/app/artifacts")
 SEQUENCE_LENGTH = int(os.getenv("SEQUENCE_LENGTH", "20"))
+SEQUENCE_STRIDE = int(os.getenv("SEQUENCE_STRIDE", "5"))
 FEATURE_SIZE = int(os.getenv("FEATURE_SIZE", "426"))
 POLL_INTERVAL_SECONDS = int(os.getenv("POLL_INTERVAL_SECONDS", "5"))
