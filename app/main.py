@@ -47,8 +47,12 @@ def verify_schema(conn):
 
 def process_data(conn, model, threshold, device, args) -> str | None:
     # 1. Son işlenen zamanı al
-    last_time = get_last_processed_time(conn, MODEL_VERSION)
-    logger.info(f"Son tahmin zaman damgası (last_time) [{MODEL_VERSION}]: {last_time}")
+    if args.force_backfill:
+        logger.info("Force backfill aktif. Son tahmin zaman damgası yoksayılıyor, tüm veri sıfırdan işlenecek.")
+        last_time = None
+    else:
+        last_time = get_last_processed_time(conn, MODEL_VERSION)
+        logger.info(f"Son tahmin zaman damgası (last_time) [{MODEL_VERSION}]: {last_time}")
     
     # 2. Belirtilen zamandan sonrasını oku (çakışmayı koruyacak şekilde)
     rows = read_feature_vectors_since(conn, last_time, sequence_length=SEQUENCE_LENGTH)
@@ -128,6 +132,8 @@ def process_data(conn, model, threshold, device, args) -> str | None:
     for t, err in zip(seq_times, errors_to_save):
         is_anomaly = bool(err >= threshold)
         results.append((t, err, threshold, is_anomaly, MODEL_VERSION))
+        status = "ANOMALİ" if is_anomaly else "NORMAL"
+        logger.info(f"Zaman: {t} | Hata: {err:.6f} | Eşik: {threshold:.6f} | Durum: {status}")
 
     logger.info(f"Yazılacak anomali tahmini sayısı: {len(results)}")
     write_anomaly_results_batch(conn, results)
@@ -147,6 +153,8 @@ def main():
                         help="Düzleştirme penceresi boyutu")
     parser.add_argument("--cpu", action="store_true",
                         help="Modeli CPU üzerinde çalışmaya zorlar")
+    parser.add_argument("--force-backfill", action="store_true",
+                        help="Son işlenen zamana bakılmaksızın tüm veritabanı verisini sıfırdan işler")
     
     args = parser.parse_args()
     
