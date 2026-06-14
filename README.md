@@ -105,6 +105,13 @@ docker run --rm \
   wind-model-inference:latest \
   python app/evaluate.py
 ```
-
-## Feature Order Uyarısı
-DB'deki `features` array sırası eski eğitimdeki 426 feature sırası ile **aynı olmalıdır**. Bu servisin modeli (GCS üzerinden indirilen ağırlıklar) belirli bir feature sırasına göre eğitildiği için veritabanına veri yazan sistemin bunu koruması gerekir.
+### 5. Jetson Canlı Veri Yayını Simülatörü (Direct DB Ingestion)
+Jetson cihazının sensör verilerini işleyip veritabanına canlı olarak attığı süreci simüle etmek için:
+```bash
+docker run --rm \
+  --env-file .env \
+  --network host \
+  wind-model-inference:latest \
+  python app/random_publisher.py --interval 2.5
+```
+*Bu komut Jetson edge cihazı gibi davranır: `wind-turbine-edge-processing/data` altındaki raw `.mat` dosyalarından rastgele birini seçer, FFT ve özellik çıkarımını yapar, veriyi ölçeklendirip doğrudan veritabanındaki `feature_vectors` tablosuna canlıymış gibi sırayla ekler.*
