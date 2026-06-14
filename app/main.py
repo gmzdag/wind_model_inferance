@@ -47,12 +47,15 @@ def verify_schema(conn):
 
 def process_data(conn, model, threshold, device, args) -> str | None:
     # 1. Son işlenen zamanı al
-    last_time = get_last_processed_time(conn)
+    last_time = get_last_processed_time(conn, MODEL_VERSION)
+    logger.info(f"Son tahmin zaman damgası (last_time) [{MODEL_VERSION}]: {last_time}")
     
     # 2. Belirtilen zamandan sonrasını oku (çakışmayı koruyacak şekilde)
     rows = read_feature_vectors_since(conn, last_time, sequence_length=SEQUENCE_LENGTH)
+    logger.info(f"Okunan feature_vectors satır sayısı: {len(rows)}")
     
     if len(rows) < SEQUENCE_LENGTH:
+        logger.warning(f"Yetersiz veri: Okunan satır sayısı ({len(rows)}) < Beklenen sequence uzunluğu ({SEQUENCE_LENGTH}). İşlem atlanıyor.")
         return last_time
 
     times = [r[0] for r in rows]
